@@ -3,7 +3,7 @@ package oauth2
 import (
 	"fmt"
 
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 	"golang.org/x/oauth2"
 )
 
@@ -11,10 +11,10 @@ import (
 // users by oauth service
 type store struct {
 	namespace string
-	store     *gobot.Brain
+	store     *bot.Brain
 }
 
-func newStore(namespace string, b *gobot.Brain) *store {
+func newStore(namespace string, b *bot.Brain) *store {
 	return &store{
 		namespace: namespace,
 		store:     b,

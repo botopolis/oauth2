@@ -1,6 +1,6 @@
 # Gobot Oauth2
 
-This plugin provides OAuth2 support for gobot
+This plugin provides OAuth2 support for bot
 
 ## Usage
 

@@ -4,19 +4,20 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/berfarah/gobot"
-	"github.com/berfarah/gobot-oauth2"
+	"github.com/botopolis/bot"
+	"github.com/botopolis/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
 type ExampleChat struct{}
 
-func (e ExampleChat) Load(*gobot.Robot)              {}
-func (e ExampleChat) Username() string               { return "" }
-func (e ExampleChat) Send(gobot.Message) error       { return nil }
-func (e ExampleChat) Reply(gobot.Message) error      { return nil }
-func (e ExampleChat) Topic(gobot.Message) error      { return nil }
-func (e ExampleChat) Messages() <-chan gobot.Message { return make(chan gobot.Message) }
+func (e ExampleChat) Load(*bot.Robot)              {}
+func (e ExampleChat) Username() string             { return "" }
+func (e ExampleChat) Send(bot.Message) error       { return nil }
+func (e ExampleChat) Reply(bot.Message) error      { return nil }
+func (e ExampleChat) Direct(bot.Message) error     { return nil }
+func (e ExampleChat) Topic(bot.Message) error      { return nil }
+func (e ExampleChat) Messages() <-chan bot.Message { return make(chan bot.Message) }
 
 func Example_google() {
 	oauth2.New(oauth2.Options{
@@ -30,7 +31,7 @@ func Example_google() {
 }
 
 func ExampleAuth() {
-	r := gobot.New(
+	r := bot.New(
 		ExampleChat{},
 		oauth2.New(oauth2.Options{
 			Name:     "google",
@@ -39,7 +40,7 @@ func ExampleAuth() {
 		}),
 	)
 
-	r.Hear(gobot.Contains("auth me!"), func(r gobot.Responder) error {
+	r.Hear(bot.Contains("auth me!"), func(r bot.Responder) error {
 		var auths oauth2.Plugin
 		if ok := r.Plugin(&auths); !ok {
 			return nil
@@ -54,7 +55,7 @@ func ExampleAuth() {
 			}
 			defer info.Body.Close()
 			b, _ := ioutil.ReadAll(info.Body)
-			r.Send(gobot.Message{Text: string(b)})
+			r.Send(bot.Message{Text: string(b)})
 		})
 		return nil
 	})

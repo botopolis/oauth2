@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 )
 
 // Plugin is the oauth2 plugin
@@ -24,7 +24,7 @@ func New(o ...Options) *Plugin {
 
 // Load is called when the plugin is loaded by gobto.Robot
 // This is the step at which options are validated
-func (p *Plugin) Load(r *gobot.Robot) {
+func (p *Plugin) Load(r *bot.Robot) {
 	for _, o := range p.opts {
 		if _, ok := p.strategies[o.Name]; ok {
 			r.Logger.Errorf("Duplicate oauth2 strategies registered: %s", o.Name)
@@ -37,7 +37,7 @@ func (p *Plugin) Load(r *gobot.Robot) {
 }
 
 // Auth delegates to Strategy.Auth()
-func (p *Plugin) Auth(strategy string, r gobot.Responder, f func(*http.Client, error)) {
+func (p *Plugin) Auth(strategy string, r bot.Responder, f func(*http.Client, error)) {
 	if s, ok := p.strategies[strategy]; ok {
 		s.Auth(r, f)
 		return

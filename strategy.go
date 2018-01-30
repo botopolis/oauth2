@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 	"golang.org/x/oauth2"
 )
 
@@ -31,8 +31,8 @@ func NewStrategy(o Options) *Strategy {
 	}
 }
 
-// Load initializes the strategy and conforms to gobot.Plugin interface
-func (s *Strategy) Load(r *gobot.Robot) {
+// Load initializes the strategy and conforms to bot.Plugin interface
+func (s *Strategy) Load(r *bot.Robot) {
 	o := s.Opts
 	if err := o.Validate(); err != nil {
 		r.Logger.Errorf("%s: %s", o.Name, err.Error())
@@ -51,7 +51,7 @@ func (s *Strategy) Load(r *gobot.Robot) {
 }
 
 // Auth is meant to be called by other plugins
-func (s *Strategy) Auth(r gobot.Responder, f func(*http.Client, error)) {
+func (s *Strategy) Auth(r bot.Responder, f func(*http.Client, error)) {
 	if token, ok := s.store.Get(r.User); ok {
 		f(s.Config.Client(oauth2.NoContext, &token), nil)
 		return

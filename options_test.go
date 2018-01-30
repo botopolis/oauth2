@@ -3,7 +3,7 @@ package oauth2_test
 import (
 	"testing"
 
-	"github.com/berfarah/gobot-oauth2"
+	"github.com/botopolis/oauth2"
 	"github.com/stretchr/testify/assert"
 )
 
