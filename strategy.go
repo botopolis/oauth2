@@ -80,32 +80,32 @@ func randToken() string {
 
 // auth handles the oauth2 callback and finds the user by
 // looking up the state in the cache (authSessions)
-func (p *Strategy) auth(w http.ResponseWriter, r *http.Request) {
+func (s *Strategy) auth(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	state := query.Get("state")
 	code := query.Get("code")
 
-	session, ok := p.authSessions.Get(state)
+	session, ok := s.authSessions.Get(state)
 	if !ok {
 		session.Run(nil, errors.New("Invalid state in callback"))
 		http.Error(w, "Invalid state", http.StatusUnauthorized)
 		return
 	}
-	p.authSessions.Delete(state)
+	s.authSessions.Delete(state)
 
-	token, err := p.Config.Exchange(oauth2.NoContext, code)
+	token, err := s.Config.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		session.Run(nil, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	p.store.Set(session.User, *token)
-	session.Run(p.Config.Client(oauth2.NoContext, token), nil)
+	s.store.Set(session.User, *token)
+	session.Run(s.Config.Client(oauth2.NoContext, token), nil)
 }
 
 // login redirects the user to the AuthCode URL
-func (p *Strategy) login(w http.ResponseWriter, r *http.Request) {
+func (s *Strategy) login(w http.ResponseWriter, r *http.Request) {
 	state := r.URL.Query().Get("state")
-	http.Redirect(w, r, p.Config.AuthCodeURL(state), 302)
+	http.Redirect(w, r, s.Config.AuthCodeURL(state), 302)
 }
