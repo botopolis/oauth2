@@ -8,7 +8,7 @@ import (
 )
 
 func TestAuthSession(t *testing.T) {
-	s := newAuthSessions()
+	s := authSessions{}
 
 	session := authSession{User: "bob", Func: func(*http.Client, error) {}}
 	sid := "foo"

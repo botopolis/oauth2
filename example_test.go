@@ -5,19 +5,10 @@ import (
 	"net/http"
 
 	"github.com/botopolis/bot"
+	"github.com/botopolis/bot/mock"
 	"github.com/botopolis/oauth2"
 	"golang.org/x/oauth2/google"
 )
-
-type ExampleChat struct{}
-
-func (e ExampleChat) Load(*bot.Robot)              {}
-func (e ExampleChat) Username() string             { return "" }
-func (e ExampleChat) Send(bot.Message) error       { return nil }
-func (e ExampleChat) Reply(bot.Message) error      { return nil }
-func (e ExampleChat) Direct(bot.Message) error     { return nil }
-func (e ExampleChat) Topic(bot.Message) error      { return nil }
-func (e ExampleChat) Messages() <-chan bot.Message { return make(chan bot.Message) }
 
 func Example_google() {
 	oauth2.New(oauth2.Options{
@@ -31,10 +22,15 @@ func Example_google() {
 }
 
 func ExampleAuth() {
+	ExampleChat := mock.NewChat()
+	ExampleChat.MessageChan = make(chan bot.Message)
+	close(ExampleChat.MessageChan)
+
 	r := bot.New(
-		ExampleChat{},
+		ExampleChat,
 		oauth2.New(oauth2.Options{
 			Name:     "google",
+			URL:      "http://localhost:4567",
 			Endpoint: google.Endpoint,
 			// ...
 		}),
@@ -61,4 +57,5 @@ func ExampleAuth() {
 	})
 
 	r.Run()
+	// Output:
 }
