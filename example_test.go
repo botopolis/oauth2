@@ -21,7 +21,7 @@ func Example_google() {
 	})
 }
 
-func ExampleAuth() {
+func Example() {
 	ExampleChat := mock.NewChat()
 	ExampleChat.MessageChan = make(chan bot.Message)
 	close(ExampleChat.MessageChan)
