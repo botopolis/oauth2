@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -20,15 +21,7 @@ type Strategy struct {
 
 	// config holds the ouath2 config
 	store        *store
-	authSessions *authSessions
-}
-
-// NewStrategy creates a Strategy
-func NewStrategy(o Options) *Strategy {
-	return &Strategy{
-		Opts:         o,
-		authSessions: newAuthSessions(),
-	}
+	authSessions authSessions
 }
 
 // Load initializes the strategy and conforms to bot.Plugin interface
@@ -46,14 +39,14 @@ func (s *Strategy) Load(r *bot.Robot) {
 		RedirectURL:  o.AuthURL(),
 	}
 
-	r.Router.HandleFunc(o.AuthPath(), s.auth).Methods("GET")
-	r.Router.HandleFunc(o.LoginPath(), s.login).Methods("GET")
+	r.Router.HandleFunc(o.AuthPath(), s.HandleAuth).Methods("GET")
+	r.Router.HandleFunc(o.LoginPath(), s.HandleLogin).Methods("GET")
 }
 
 // Auth is meant to be called by other plugins
 func (s *Strategy) Auth(r bot.Responder, f func(*http.Client, error)) {
 	if token, ok := s.store.Get(r.User); ok {
-		f(s.Config.Client(oauth2.NoContext, &token), nil)
+		f(s.Config.Client(context.Background(), &token), nil)
 		return
 	}
 
@@ -78,9 +71,9 @@ func randToken() string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-// auth handles the oauth2 callback and finds the user by
+// HandleAuth handles the oauth2 callback and finds the user by
 // looking up the state in the cache (authSessions)
-func (s *Strategy) auth(w http.ResponseWriter, r *http.Request) {
+func (s *Strategy) HandleAuth(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	state := query.Get("state")
 	code := query.Get("code")
@@ -93,7 +86,7 @@ func (s *Strategy) auth(w http.ResponseWriter, r *http.Request) {
 	}
 	s.authSessions.Delete(state)
 
-	token, err := s.Config.Exchange(oauth2.NoContext, code)
+	token, err := s.Config.Exchange(context.Background(), code)
 	if err != nil {
 		session.Run(nil, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -101,11 +94,15 @@ func (s *Strategy) auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.store.Set(session.User, *token)
-	session.Run(s.Config.Client(oauth2.NoContext, token), nil)
+	session.Run(s.Config.Client(context.Background(), token), nil)
 }
 
-// login redirects the user to the AuthCode URL
-func (s *Strategy) login(w http.ResponseWriter, r *http.Request) {
+// HandleLogin redirects the user to the AuthCode URL
+func (s *Strategy) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	state := r.URL.Query().Get("state")
+	if state == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	http.Redirect(w, r, s.Config.AuthCodeURL(state), 302)
 }

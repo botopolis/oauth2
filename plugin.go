@@ -30,7 +30,7 @@ func (p *Plugin) Load(r *bot.Robot) {
 			r.Logger.Errorf("Duplicate oauth2 strategies registered: %s", o.Name)
 			continue
 		}
-		s := NewStrategy(o)
+		s := &Strategy{Opts: o}
 		s.Load(r)
 		p.strategies[o.Name] = s
 	}
