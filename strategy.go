@@ -52,7 +52,8 @@ func (s *Strategy) Auth(r bot.Responder, f func(*http.Client, error)) {
 
 	sid := randToken()
 	err := r.Direct(fmt.Sprintf(
-		"I need you to log in before you can do that: %s?state=%s",
+		"Requesting %s oauth2 access: %s?state=%s",
+		o.Opts.Name,
 		s.Opts.LoginURL(),
 		sid,
 	))
